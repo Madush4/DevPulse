@@ -27,7 +27,7 @@ export function upsertUser(userData) {
                 following = @following,
                 public_repos = @public_repos,
                 cached_at = @cached_at
-             );
+             
 
         `);
 
@@ -59,7 +59,7 @@ export function upsertRepo(repoData) {
       stars  = @stars,
       forks = @forks,
       pushed_at = @pushed_at,
-      cached_at = @cached_at;
+      cached_at = @cached_at
 
     `);
   return stmt.run(repoData);
@@ -217,7 +217,7 @@ export function getCommitStats(userId) {
   for (let i = 1; i < dates.length; i++) {
     const prev = new Date(dates[i - 1]);
     const curr = new Date(dates[i]);
-    const diff = Math.floor(prev - curr) / (1000 * 60 * 60 * 24);
+    const diff = Math.floor((prev - curr) / (1000 * 60 * 60 * 24));
     if (diff == 1) {
       tempStreak++;
       longestStreak = Math.max(longestStreak, tempStreak);

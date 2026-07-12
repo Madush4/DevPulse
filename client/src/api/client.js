@@ -12,7 +12,7 @@ export async function fetchProfile(username) {
     const customError = new Error("Faliled to fetch profile");
     customError.status = error.response?.status;
     customError.message =
-      error.response?.data?.message || "Something went wrong";
+      error.response?.data?.error || "Something went wrong";
     throw customError;
   }
 }
@@ -25,7 +25,7 @@ export async function refreshProfile(username) {
     const customError = new Error("Failed to fetch profile.");
     customError.status = error.response?.status;
     customError.message =
-      error.response?.data?.message || "Something went wrong";
+      error.response?.data?.error || "Something went wrong";
 
     throw customError;
   }
