@@ -22,6 +22,7 @@ export function useProfile(username) {
         setLoading(false);
       }
     }
+    loadProfile();
   }, [username]);
 
   return { data, loading, error };
