@@ -5,7 +5,9 @@ import Footer from '../components/layout/Footer';
 function Home() {
   return (
     <div className='bg-slate-800'>
-      <Navbar />
+      <Navbar 
+        showSync={false}
+      />
       <h1>Home</h1>
       <Footer/>
     </div>
