@@ -2,6 +2,8 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useProfile } from "../hooks/useProfile";
 import Spinner from "../ui/Spinner";
+import Navbar from "../components/layout/Navbar";
+import ProfileHeader from "../components/profile/ProfileHeader";
 
 
 function Profile() {
@@ -25,13 +27,15 @@ function Profile() {
       </>
     );
   }
+  console.log("Profile page user location:", data.user.location);
   return (
-    <div>
-      <h1>Profile Status</h1>
-      <p>Username: {data.user.github_username}</p>
-      <p>Name: {data.user.display_name}</p>
-      <p>Followers: {data.user.followers}</p>
-      <p>Repositories: {data.user.public_repos}</p>
+    <div className="bg-slate-800">
+      <Navbar
+        showSync={true}
+        cachedAt={data.user.cached_at}
+        onRefresh={() =>console.log("refreshed clicked.")}
+      />
+      <ProfileHeader user = {data.user}/>
     </div>
   );
 }
