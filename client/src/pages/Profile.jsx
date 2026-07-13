@@ -4,7 +4,7 @@ import { useProfile } from "../hooks/useProfile";
 import Spinner from "../ui/Spinner";
 import Navbar from "../components/layout/Navbar";
 import ProfileHeader from "../components/profile/ProfileHeader";
-
+import Footer from "../components/layout/Footer";
 
 function Profile() {
   const { username } = useParams();
@@ -36,6 +36,7 @@ function Profile() {
         onRefresh={() =>console.log("refreshed clicked.")}
       />
       <ProfileHeader user = {data.user}/>
+      <Footer />
     </div>
   );
 }
