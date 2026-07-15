@@ -5,6 +5,7 @@ import Spinner from "../ui/Spinner";
 import Navbar from "../components/layout/Navbar";
 import ProfileHeader from "../components/profile/ProfileHeader";
 import Footer from "../components/layout/Footer";
+import StatCard from "../components/profile/StatCard";
 
 function Profile() {
   const { username } = useParams();
