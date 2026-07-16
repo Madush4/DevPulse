@@ -20,6 +20,38 @@ async function githubFetch(url) {
   return response.json();
 }
 
+export async function fetchRepoCommits(username, repoName) {
+  try {
+    const since = new Date();
+    since.setFullYear(since.getFullYear() - 1);
+
+    const data = await githubFetch(
+      `${BASE_URL}/repos/${username}/${repoName}/commits?author=${username}&since=${since.toISOString()}&per_page=100`,
+    );
+
+    return data.map((item) => {
+      const committedAt = item.commit.author.date;
+      const date = new Date(committedAt);
+
+      return {
+        sha: item.sha,
+        committed_at: committedAt,
+        hour_of_day: date.getHours(),
+        day_of_week: date.getDay(),
+        repo_name: repoName,
+      };
+    });
+  } catch (error) {
+    if (error.status === 409) {
+      console.log(`Skipping ${repoName}: no commits or empty repository.`);
+      return [];
+    }
+
+    console.error(`Could not fetch commits for ${repoName}:`, error.message);
+    return [];
+  }
+}
+
 export async function fetchUser(username) {
   const data = await githubFetch(`${BASE_URL}/users/${username}`);
 

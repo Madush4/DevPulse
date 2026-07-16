@@ -1,6 +1,7 @@
 import React from "react";
 import { FaMapMarkerAlt, FaUsers, FaUserFriends, FaBook } from "react-icons/fa";
 
+
 function ProfileHeader({ user }) {
   const name = user.display_name || user.github_username;
   console.log("location", user.location);
@@ -59,6 +60,7 @@ function ProfileHeader({ user }) {
           </div>
         </div>
       </div>
+      
     </section>
   );
 }
