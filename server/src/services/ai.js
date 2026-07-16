@@ -5,12 +5,12 @@ const ai = new GoogleGenAI({
 });
  
 export async function generateSummary(profile) {
-  const topLanguages = profile.topLanguages
+  const topLanguages = (profile.languages || [])
     .slice(0, 3)
     .map((l) => l.language)
     .join(",");
 
-  const topRepos = profile.topRepos
+  const topRepos =( profile.repos || [])
     .slice(0, 3)
     .map((r) => `${r.repo_name} (${r.stars} stars)`)
     .join(",");

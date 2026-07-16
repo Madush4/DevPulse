@@ -2,7 +2,7 @@ import {
   fetchUser,
   fetchRepos,
   fetchRepoLanguages,
-  fetchEvents,
+  fetchRepoCommits,
 } from "./github.js";
 
 import { generateSummary } from "./ai.js";
@@ -36,17 +36,26 @@ export function isCacheFresh(username) {
 
 export async function refreshCache(username) {
   let apiCallUsed = 0;
+  let savedUserId = null;
+  let realUsername = username;
 
   try {
     const userData = await fetchUser(username);
     apiCallUsed++;
 
+    realUsername = userData.github_username;
+
     userData.cached_at = new Date().toISOString();
     upsertUser(userData);
 
-    const userId = getUserId(username);
+    const userId = getUserId(realUsername);
+    savedUserId = userId;
 
-    const repos = await fetchRepos(username);
+    if (!userId) {
+      throw new Error(`User ID not found after saving user: ${realUsername}`);
+    }
+
+    const repos = await fetchRepos(realUsername);
     apiCallUsed++;
 
     for (const repo of repos) {
@@ -57,36 +66,52 @@ export async function refreshCache(username) {
       });
 
       if (!repo.is_fork) {
-        const languages = await fetchRepoLanguages(username, repo.repo_name);
+        const languages = await fetchRepoLanguages(
+          realUsername,
+          repo.repo_name,
+        );
         apiCallUsed++;
 
         const savedRepo = getRepoByGithubId(repo.github_repo_id);
+
         if (savedRepo && Object.keys(languages).length > 0) {
           upsertLanguages(savedRepo.id, languages);
         }
       }
     }
 
-    const commits = await fetchEvents(username);
-    apiCallUsed++;
+    let totalCommitsFetched = 0;
 
-    for (const commit of commits) {
-      const matchingRepo = repos.find((r) => r.repo_name === commit.repo_name);
-      const savedRepo = matchingRepo
-        ? getRepoByGithubId(matchingRepo.github_repo_id)
-        : null;
+    for(const repo of repos) {
+      if (repo.is_fork) continue;
 
-      upsertCommit({
-        user_id: userId,
-        repo_id: savedRepo ? savedRepo.id : null,
-        sha: commit.sha,
-        committed_at: commit.committed_at,
-        hour_of_day: commit.hour_of_day,
-        day_of_week: commit.day_of_week,
-      });
+      const savedRepo = getRepoByGithubId(repo.github_repo_id);
+
+      if (!savedRepo) continue;
+
+      const commits = await fetchRepoCommits(realUsername, repo.repo_name);
+      apiCallUsed++;
+      totalCommitsFetched += commits.length;
+
+      for (const commit of commits) {
+        upsertCommit({
+          user_id: userId,
+          repo_id: savedRepo.id,
+          sha: commit.sha,
+          committed_at: commit.committed_at,
+          hour_of_day: commit.hour_of_day,
+          day_of_week: commit.day_of_week,
+        });
+      }
     }
 
-    const profile = getFullProfile(username);
+    console.log("Total repo commits fetched:", totalCommitsFetched);
+    const debugProfile = getFullProfile(realUsername);
+
+    console.log("Debug stats after saving commits:", debugProfile.stats);
+    console.log("Debug heatmap count:", debugProfile.heatmap.length);
+    console.log("Debug weekly count:", debugProfile.weekly_commits.length);
+    const profile = getFullProfile(realUsername);
 
     if (profile && profile.stats.total_commits > 0) {
       const aiResult = await generateSummary(profile);
@@ -102,13 +127,15 @@ export async function refreshCache(username) {
     logCacheFetch(userId, "success", "auto", apiCallUsed);
 
     console.log(
-      `Cache refreshed for ${username} - ${apiCallUsed} API calls used.`,
+      `Cache refreshed for ${realUsername} - ${apiCallUsed} API calls used.`,
     );
-    return getFullProfile(username);
+
+    return getFullProfile(realUsername);
   } catch (error) {
-    const userId = getUserId(username);
-    if (userId) {
-      logCacheFetch(userId, "error", "auto", apiCallUsed);
+    console.error(`Refresh cache failed for ${realUsername}:`, error);
+
+    if (savedUserId) {
+      logCacheFetch(savedUserId, "error", "auto", apiCallUsed);
     }
 
     throw error;

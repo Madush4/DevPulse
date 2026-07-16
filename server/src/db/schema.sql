@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS commit_events(
 
 
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL UNIQUE,
+        user_id INTEGER NOT NULL,
         repo_id INTEGER,
         sha TEXT UNIQUE,
         committed_at DATETIME NOT NULL,
