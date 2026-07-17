@@ -6,6 +6,8 @@ import Navbar from "../components/layout/Navbar";
 import ProfileHeader from "../components/profile/ProfileHeader";
 import Footer from "../components/layout/Footer";
 import StatCard from "../components/profile/StatCard";
+import NotFound from "../components/ui/NotFound";
+import ErrorMessage from "../components/ui/ErrorMessage";
 
 function Profile() {
   const { username } = useParams();
@@ -16,16 +18,19 @@ function Profile() {
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-slate-950 p-6 text-white">
-        <h1>Something went wrong</h1>
-        <p>Status: {error.status}</p>
-        <p>{error.message}</p>
-      </div>
-    );
+      if(error.status === 404){
+        return(
+            <NotFound username={username}/>
+        )
+      }
+      return(
+        <ErrorMessage error={error} username={username} />
+      )
   }
 
   console.log("Profile page user location:", data.user.location);
+
+
 
   return (
     <div className="min-h-screen bg-slate-800">
@@ -63,6 +68,10 @@ function Profile() {
             sub="by bytes"
           />
         </div>
+        
+       
+
+        
       </main>
 
       <Footer />
