@@ -16,7 +16,7 @@ function Navbar({ showSync = false, cachedAt, onRefresh }) {
   }
 
   return (
-    <nav className="flex justify-between items-center px-8 py-4 border-b border-white/10 bg-transparent">
+    <nav className="flex justify-between items-center px-8 py-4 border-b border-white/10 bg-transparent mb-10">
       <div className="flex">
         <Link
           to="/"
