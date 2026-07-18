@@ -115,6 +115,16 @@ export function getLanguagesByUserId(userId) {
   return stmt.all(userId);
 }
 
+export function getLanguagesByRepoId(repoId) {
+  const stmt = db.prepare(
+    `SELECT language 
+    FROM repo_languages
+    WHERE repo_id = ?
+    ORDER BY bytes DESC
+    `,
+  );
+  return stmt.all(repoId);
+}
 export function upsertCommit(commitData) {
   const stmt = db.prepare(
     `
@@ -300,13 +310,18 @@ export function getFullProfile(username) {
   const repos = getRepoByUserId(user.id);
   const languages = getLanguagesByUserId(user.id);
   const heatmap = getHeatmapData(user.id);
+  const reposWithLanguages = repos.map((repo) => ({
+    ...repo,
+    languages: getLanguagesByRepoId(repo.id),
+  }));
+  
   const weekly = getWeeklyCommits(user.id);
   const stats = getCommitStats(user.id);
   const aiSummary = getAiSummary(user.id);
 
   return {
     user,
-    repos,
+    repos: reposWithLanguages,
     languages,
     heatmap,
     weekly_commits: weekly,
