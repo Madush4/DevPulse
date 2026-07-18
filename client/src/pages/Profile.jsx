@@ -8,6 +8,7 @@ import StatCard from "../components/profile/StatCard";
 import NotFound from "../components/ui/NotFound";
 import ErrorMessage from "../components/ui/ErrorMessage";
 import TopRepos from "../components/profile/TopRepos";
+import AiSummaryCard from "../components/profile/AiSummaryCard";
 
 function Profile() {
   const { username } = useParams();
@@ -42,6 +43,7 @@ function Profile() {
 
       <main className="mx-auto max-w-6xl space-y-6 px-6 py-8">
         <ProfileHeader user={data.user} />
+        <AiSummaryCard ai={data.ai} />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <StatCard
