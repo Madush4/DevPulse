@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { useProfile } from "../hooks/useProfile";
-
 import Spinner from "../components/ui/Spinner";
 import Navbar from "../components/layout/Navbar";
 import ProfileHeader from "../components/profile/ProfileHeader";
@@ -8,6 +7,7 @@ import Footer from "../components/layout/Footer";
 import StatCard from "../components/profile/StatCard";
 import NotFound from "../components/ui/NotFound";
 import ErrorMessage from "../components/ui/ErrorMessage";
+import TopRepos from "../components/profile/TopRepos";
 
 function Profile() {
   const { username } = useParams();
@@ -68,10 +68,10 @@ function Profile() {
             sub="by bytes"
           />
         </div>
-        
-       
 
+        <TopRepos repos = {data.repos}/>
         
+          
       </main>
 
       <Footer />
