@@ -3,20 +3,31 @@ import { GoogleGenAI } from "@google/genai";
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
- 
+
 export async function generateSummary(profile) {
   const topLanguages = (profile.languages || [])
     .slice(0, 3)
-    .map((l) => l.language)
-    .join(",");
+    .map((language) => language.language)
+    .join(", ");
 
-  const topRepos =( profile.repos || [])
+  const topRepos = (profile.repos || [])
     .slice(0, 3)
-    .map((r) => `${r.repo_name} (${r.stars} stars)`)
-    .join(",");
+    .map((repo) => `${repo.repo_name} (${repo.stars} stars)`)
+    .join(", ");
 
   const prompt = `
-    You are analyzing a developer's GitHub profile data. Based ONLY on the data provided below, write an honest and specific developer profile.
+You are analyzing a developer's GitHub profile data.
+
+Based ONLY on the data provided below, return valid JSON only.
+Do not use markdown.
+Do not wrap the JSON in code blocks.
+
+Return this exact JSON structure:
+{
+  "summary": "2-3 sentence paragraph describing the developer in third person",
+  "strengths": ["strength 1", "strength 2", "strength 3"],
+  "improvements": ["improvement 1", "improvement 2"]
+}
 
 DEVELOPER DATA:
 - Username: ${profile.user.github_username}
@@ -25,68 +36,45 @@ DEVELOPER DATA:
 - Location: ${profile.user.location || "Not provided"}
 - Followers: ${profile.user.followers}
 - Public repos: ${profile.user.public_repos}
-- Total commits (last 90 days): ${profile.stats.total_commits}
+- Total commits: ${profile.stats.total_commits}
 - Current streak: ${profile.stats.current_streak} days
 - Longest streak: ${profile.stats.longest_streak} days
 - Top languages: ${topLanguages || "Not available"}
 - Top repos by stars: ${topRepos || "Not available"}
 
 Rules:
-- Be specific — mention actual numbers, languages, and repo names
-- Be honest — if streak is 0, don't say they are consistent
-- Do not invent information not in the data
-- Strengths and improvements must each be one sentence max
-    `;
+- Be specific and honest.
+- Mention actual numbers, languages, and repo names.
+- Do not invent information not shown in the data.
+- Each strength and improvement must be one sentence max.
+`;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: process.env.GEMINI_MODEL || "gemini-2.0-flash-lite",
       contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "object",
-          properties: {
-            summary: {
-              type: "string",
-              description:
-                "2-3 sentence paragraph describing the developer. Be specific and use the actual data . Write in third person.",
-            },
-            strengths: {
-              type: "array",
-              items: {
-                type: "string",
-              },
-              description:
-                "Exactly 3 specific strengths based on data, one sentence max each",
-            },
-
-            improvements: {
-              type: "array",
-              items: {
-                type: "string",
-              },
-              description:
-                "Exactly 2 specific areas to improve based on data, one sentence max each",
-            },
-          },
-
-          required: ["summary", "strengths", "improvements"],
-        },
-      },
     });
 
-    const parsed = JSON.parse(response.text);
+    const cleanedText = response.text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    const parsed = JSON.parse(cleanedText);
 
     return {
-      summary: parsed.summary || "No summary available",
-      strengths: parsed.strengths || [],
-      improvements: parsed.improvements || [],
+      summary: parsed.summary || "No summary available.",
+      strengths: Array.isArray(parsed.strengths) ? parsed.strengths : [],
+      improvements: Array.isArray(parsed.improvements)
+        ? parsed.improvements
+        : [],
     };
   } catch (error) {
-    console.error("AI summary generation failed:", error.message);
+    console.error("AI summary generation failed:", error);
+
     return {
-      summary: "AI summary could not be generated at this time .",
+      summary:
+        "AI summary is temporarily unavailable because the AI service could not generate a response.",
       strengths: [],
       improvements: [],
     };
