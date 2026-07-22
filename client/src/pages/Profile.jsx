@@ -12,33 +12,33 @@ import AiSummaryCard from "../components/profile/AiSummaryCard";
 
 function Profile() {
   const { username } = useParams();
-  const { data, loading, error } = useProfile(username);
+  const { data, loading, error, refreshing, reLoadProfile } =
+    useProfile(username);
 
   if (loading) {
     return <Spinner username={username} />;
   }
 
+  
+
+
   if (error) {
-      if(error.status === 404){
-        return(
-            <NotFound username={username}/>
-        )
-      }
-      return(
-        <ErrorMessage error={error} username={username} />
-      )
+    if (error.status === 404) {
+      return <NotFound username={username} />;
+    }
+    return <ErrorMessage error={error} username={username} />;
   }
 
   console.log("Profile page user location:", data.user.location);
 
-
-
   return (
     <div className="min-h-screen bg-slate-800">
       <Navbar
+
         showSync={true}
         cachedAt={data.user.cached_at}
-        onRefresh={() => console.log("refresh clicked.")}
+        onRefresh={() => reLoadProfile()}
+        refreshing={refreshing}
       />
 
       <main className="mx-auto max-w-6xl space-y-6 px-6 py-8">
@@ -71,9 +71,7 @@ function Profile() {
           />
         </div>
 
-        <TopRepos repos = {data.repos}/>
-        
-          
+        <TopRepos repos={data.repos} />
       </main>
 
       <Footer />
