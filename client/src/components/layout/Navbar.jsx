@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { FiClock, FiRefreshCw } from "react-icons/fi";
 
-function Navbar({ showSync = false, cachedAt, onRefresh }) {
+
+function Navbar({ showSync = false, cachedAt, onRefresh ,refreshing }) {
   function getSyncText() {
     if (!cachedAt) return "not synced yet!";
 
@@ -34,11 +35,17 @@ function Navbar({ showSync = false, cachedAt, onRefresh }) {
               <span>{getSyncText()}</span>
             </div>
             <button
+              disabled={refreshing}
               onClick={onRefresh}
-              className="flex items-center gap-2 rounded-full border border-white/20 px-3 py-1 text-sm font-semibold text-gray-300 transition hover:border-white/40 hover:text-white"
+              className={`flex w-32 items-center justify-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold transition
+                ${refreshing
+                  ? "cursor-not-allowed border-white/10 text-gray-500"
+                  : "border-white/20 text-gray-300 hover:border-white/40 hover:text-white"
+              }`}
             >
               <FiRefreshCw size={12} />
-              refresh
+
+              {refreshing ? "refreshing" : "refresh"}
             </button>
           </div>
         )}
