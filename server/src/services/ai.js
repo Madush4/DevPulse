@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
-
+console.log("Gemini key ending:", process.env.GEMINI_API_KEY?.slice(-6));
 export async function generateSummary(profile) {
   const topLanguages = (profile.languages || [])
     .slice(0, 3)
@@ -14,6 +14,7 @@ export async function generateSummary(profile) {
     .slice(0, 3)
     .map((repo) => `${repo.repo_name} (${repo.stars} stars)`)
     .join(", ");
+
 
   const prompt = `
 You are analyzing a developer's GitHub profile data.
